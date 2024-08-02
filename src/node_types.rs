@@ -1,0 +1,55 @@
+pub struct NodeType;
+
+#[allow(dead_code)]
+impl NodeType {
+    pub const ARGUMENTS: &'static str = "arguments";
+    pub const ASSIGNMENT_STATEMENT: &'static str = "assignment_statement";
+    pub const ATTRIBUTE: &'static str = "attribute";
+    pub const BINARY_EXPRESSION: &'static str = "binary_expression";
+    pub const BLOCK: &'static str = "block";
+    pub const BRACKET_INDEX_EXPRESSION: &'static str = "bracket_index_expression";
+    pub const BREAK_STATEMENT: &'static str = "break_statement";
+    pub const CHUNK: &'static str = "chunk";
+    pub const COMMENT: &'static str = "comment";
+    pub const COMMENT_CONTENT: &'static str = "comment_content";
+    pub const DECLARATION: &'static str = "declaration";
+    pub const DO_STATEMENT: &'static str = "do_statement";
+    pub const DOT_INDEX_EXPRESSION: &'static str = "dot_index_expression";
+    pub const ELSEIF_STATEMENT: &'static str = "elseif_statement";
+    pub const ELSE_STATEMENT: &'static str = "else_statement";
+    pub const EMPTY_STATEMENT: &'static str = "empty_statement";
+    pub const ESCAPE_SEQUENCE: &'static str = "escape_sequence";
+    pub const EXPRESSION: &'static str = "expression";
+    pub const EXPRESSION_LIST: &'static str = "expression_list";
+    pub const FALSE: &'static str = "false";
+    pub const FIELD: &'static str = "field";
+    pub const FOR_GENERIC_CLAUSE: &'static str = "for_generic_clause";
+    pub const FOR_NUMERIC_CLAUSE: &'static str = "for_numeric_clause";
+    pub const FOR_STATEMENT: &'static str = "for_statement";
+    pub const FUNCTION_CALL: &'static str = "function_call";
+    pub const FUNCTION_DECLARATION: &'static str = "function_declaration";
+    pub const FUNCTION_DEFINITION: &'static str = "function_definition";
+    pub const GOTO_STATEMENT: &'static str = "goto_statement";
+    pub const HASH_BANG_LINE: &'static str = "hash_bang_line";
+    pub const IDENTIFIER: &'static str = "identifier";
+    pub const IF_STATEMENT: &'static str = "if_statement";
+    pub const LABEL_STATEMENT: &'static str = "label_statement";
+    pub const METHOD_INDEX_EXPRESSION: &'static str = "method_index_expression";
+    pub const NIL: &'static str = "nil";
+    pub const NUMBER: &'static str = "number";
+    pub const PARAMETERS: &'static str = "parameters";
+    pub const PARENTHESIZED_EXPRESSION: &'static str = "parenthesized_expression";
+    pub const REPEAT_STATEMENT: &'static str = "repeat_statement";
+    pub const RETURN_STATEMENT: &'static str = "return_statement";
+    pub const STATEMENT: &'static str = "statement";
+    pub const STRING: &'static str = "string";
+    pub const STRING_CONTENT: &'static str = "string_content";
+    pub const TABLE_CONSTRUCTOR: &'static str = "table_constructor";
+    pub const TRUE: &'static str = "true";
+    pub const UNARY_EXPRESSION: &'static str = "unary_expression";
+    pub const VARARG_EXPRESSION: &'static str = "vararg_expression";
+    pub const VARIABLE: &'static str = "variable";
+    pub const VARIABLE_DECLARATION: &'static str = "variable_declaration";
+    pub const VARIABLE_LIST: &'static str = "variable_list";
+    pub const WHILE_STATEMENT: &'static str = "while_statement";
+}

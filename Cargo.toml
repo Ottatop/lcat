@@ -1,0 +1,18 @@
+[package]
+name = "lcat"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.9", features = ["derive"] }
+anyhow = { version = "1.0.86", features = ["backtrace"] }
+tree-sitter = "0.22.6"
+tree-sitter-lua = "0.1.0"
+walkdir = "2.3.3"
+pest = "2.7.11"
+pest_derive = { version = "2.7.11", features = ["grammar-extras"] }
+replace_with = "0.1.7"
+indexmap = "2.2.6"
+tempfile = "3.10.1"
+dircpy = "0.3.17"
+markdown = "1.0.0-alpha.18"
