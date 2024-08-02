@@ -218,7 +218,7 @@ impl Processor {
                                 _ => (),
                             }
                         }
-                        Err(_) => todo!(),
+                        Err(err) => eprintln!("{err}"),
                     }
                 }
                 Some((Annotation::Return, ret)) => {
@@ -276,7 +276,7 @@ impl Processor {
                             }
                             fn_annotations.clear();
                         }
-                        Err(_) => todo!(),
+                        Err(err) => eprintln!("{err}"),
                     }
                 }
                 Some((Annotation::Lcat, lcat)) => {

@@ -1,0 +1,28 @@
+.VPBadge.function {
+    border-color: var(--vp-badge-tip-border);
+    color: var(--vp-badge-tip-text);
+    background-color: var(--vp-badge-tip-bg);
+}
+
+.VPBadge.method {
+    border-color: var(--vp-badge-warning-border);
+    color: var(--vp-badge-warning-text);
+    background-color: var(--vp-badge-warning-bg);
+}
+
+a {
+    text-decoration: none !important;
+}
+pre {
+    white-space: pre-wrap;
+}
+:root {
+    --vp-code-color: var(--vp-c-text-1);
+}
+.vp-doc h2 {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+.vp-doc h2 .header-anchor {
+    top: 12px;
+}

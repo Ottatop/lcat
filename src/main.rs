@@ -39,14 +39,20 @@ fn main() {
 
     let processor = parse_files(files).unwrap();
 
-    VitePressRenderer::new().render(processor);
+    VitePressRenderer::new(cli.out_dir.unwrap_or("./lcat_out".into())).render(processor);
 }
 
 #[derive(clap::Parser, Debug)]
 struct Cli {
+    /// Set the root search directory that lcat will look for Lua files in
     #[arg(short, long, value_name("DIR"), value_hint(ValueHint::DirPath))]
     dir: Option<PathBuf>,
 
+    /// Add one or more Lua files to generate documentation for
     #[arg(short, long)]
     files: Vec<PathBuf>,
+
+    /// Set the output directory (defaults to `ldoc_gen`)
+    #[arg(short, long, value_name("DIR"), value_hint(ValueHint::DirPath))]
+    out_dir: Option<PathBuf>,
 }

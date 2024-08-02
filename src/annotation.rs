@@ -112,20 +112,28 @@ fn parse_function(pair: Pair<Rule>) -> Type {
 
                     let mut ident = None;
                     let mut ty = None;
+                    let mut nullable = false;
 
                     for pair in pair.into_inner() {
                         match pair.as_rule() {
                             Rule::ident => ident = Some(pair.as_str().to_string()),
+                            Rule::nullable => nullable = true,
                             Rule::ty => ty = Some(parse_type(pair)),
                             _ => unreachable!(),
                         }
+                    }
+
+                    let mut ty = ty.unwrap_or(Type::ANY);
+
+                    if nullable {
+                        ty.make_nullable();
                     }
 
                     let Some(ident) = ident else {
                         unreachable!();
                     };
 
-                    args.push((ident, ty.unwrap_or(Type::ANY)));
+                    args.push((ident, ty));
                 }
             }
             Rule::function_returns => {
@@ -172,15 +180,23 @@ fn parse_table(pair: Pair<Rule>) -> Type {
         let mut pairs = pair.into_inner();
 
         let field_name_or_type = pairs.next().unwrap();
-        let field_name_or_type = match field_name_or_type.as_rule() {
+        let mut field_name_or_type = match field_name_or_type.as_rule() {
             Rule::ty => parse_type(field_name_or_type),
             Rule::ident => Type::string_literal(field_name_or_type.as_str()),
             _ => unreachable!(),
         };
 
-        let ty = parse_type(pairs.next().unwrap());
+        let mut ty = None;
 
-        fields.push((field_name_or_type, ty));
+        for pair in pairs {
+            match pair.as_rule() {
+                Rule::ty => ty = Some(parse_type(pair)),
+                Rule::nullable => field_name_or_type.make_nullable(),
+                _ => unreachable!(),
+            }
+        }
+
+        fields.push((field_name_or_type, ty.unwrap()));
     }
 
     Type::table(fields)
@@ -284,7 +300,7 @@ pub fn parse_alias(alias: &str, description: Option<String>) -> anyhow::Result<A
 
     for pair in alias.next().unwrap().into_inner() {
         match pair.as_rule() {
-            Rule::ident => name = Some(pair.as_str().to_string()),
+            Rule::type_ident => name = Some(pair.as_str().to_string()),
             Rule::ty => inline_alias = Some(parse_type(pair)),
             Rule::rest_of_line => eol_desc = Some(pair.as_str().to_string()),
             _ => unreachable!(),
@@ -383,7 +399,7 @@ pub fn parse_enum(r#enum: &str, description: Option<String>) -> anyhow::Result<E
     for pair in r#enum.next().unwrap().into_inner() {
         match pair.as_rule() {
             Rule::enum_key => is_key = true,
-            Rule::ident => name = Some(pair.as_str().to_string()),
+            Rule::type_ident => name = Some(pair.as_str().to_string()),
             Rule::rest_of_line => (),
             _ => unreachable!(),
         }

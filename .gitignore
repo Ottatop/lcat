@@ -15,3 +15,5 @@ target/
 /target
 
 lcat_out/
+vitepress_template/.vitepress/dist
+vitepress_template/.vitepress/cache

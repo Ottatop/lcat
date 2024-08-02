@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 use markdown::ParseOptions;
 
@@ -6,11 +6,13 @@ use crate::{annotation::Function, processor::Processor, treesitter::FieldName, t
 
 use super::Renderer;
 
-pub struct VitePressRenderer;
+pub struct VitePressRenderer {
+    out_dir: PathBuf,
+}
 
 impl VitePressRenderer {
-    pub fn new() -> Self {
-        Self
+    pub fn new(out_dir: PathBuf) -> Self {
+        Self { out_dir }
     }
 }
 
@@ -289,11 +291,13 @@ outline: [2, 3]
             std::fs::write(write_to, contents).unwrap();
         }
 
-        let _ = std::fs::remove_dir_all("./lcat_out");
+        let _ = std::fs::remove_dir_all(self.out_dir.join("classes"));
+        let _ = std::fs::remove_dir_all(self.out_dir.join("enums"));
+        let _ = std::fs::remove_dir_all(self.out_dir.join("aliases"));
 
         dircpy::copy_dir_advanced(
             root_dir,
-            "./lcat_out",
+            &self.out_dir,
             true,
             true,
             true,

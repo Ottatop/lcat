@@ -216,15 +216,19 @@ impl Type {
             TypeInner::Function { args, ret } => {
                 let args = args
                     .iter()
-                    .map(|(name, ty)| format!("{name}: {}", ty.format_with_links(ident_lookup)))
+                    .map(|(name, ty)| {
+                        let nullable = ty.nullable.then_some("?").unwrap_or_default();
+                        format!("{name}{nullable}: {}", ty.format_with_links(ident_lookup))
+                    })
                     .collect::<Vec<_>>()
                     .join(", ");
 
                 let mut returns = ret
                     .iter()
                     .map(|(name, ty)| {
+                        let nullable = ty.nullable.then_some("?").unwrap_or_default();
                         format!(
-                            "{}{}",
+                            "{}{}{nullable}",
                             name.as_ref()
                                 .map(|name| format!("{name}: "))
                                 .unwrap_or_default(),
@@ -285,7 +289,16 @@ impl Type {
                         Metatype::Alias => "aliases",
                         Metatype::Enum => "enums",
                     };
-                    format!(r#"<a href="/{path}/{name}">{name}</a>"#)
+                    // ???????? VitePress throws an element has missing tag error if the character
+                    // directly after a tag is an underscore
+                    let sanitized_name = if name.chars().next().is_some_and(|ch| ch == '_') {
+                        let mut clone = name.clone();
+                        clone.replace_range(0..1, "&#95;");
+                        clone
+                    } else {
+                        name.clone()
+                    };
+                    format!(r#"<a href="/{path}/{name}">{sanitized_name}</a>"#)
                 } else {
                     name.clone()
                 }
