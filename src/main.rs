@@ -39,7 +39,8 @@ fn main() {
 
     let processor = parse_files(files).unwrap();
 
-    VitePressRenderer::new(cli.out_dir.unwrap_or("./lcat_out".into())).render(processor);
+    VitePressRenderer::new(cli.out_dir.unwrap_or("./lcat_out".into()), cli.base_url)
+        .render(processor);
 }
 
 #[derive(clap::Parser, Debug)]
@@ -55,4 +56,12 @@ struct Cli {
     /// Set the output directory (defaults to `ldoc_gen`)
     #[arg(short, long, value_name("DIR"), value_hint(ValueHint::DirPath))]
     out_dir: Option<PathBuf>,
+
+    /// Set the base url.
+    ///
+    /// If you are using VitePress with GitHub pages, you need to add the repository as
+    /// a base url. Because lcat uses <a> for links instead of markdown links,
+    /// you also need to specify the base url here.
+    #[arg(short, long)]
+    base_url: Option<String>,
 }

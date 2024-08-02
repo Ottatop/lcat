@@ -8,11 +8,15 @@ use super::Renderer;
 
 pub struct VitePressRenderer {
     out_dir: PathBuf,
+    base_url: String,
 }
 
 impl VitePressRenderer {
-    pub fn new(out_dir: PathBuf) -> Self {
-        Self { out_dir }
+    pub fn new(out_dir: PathBuf, base_url: Option<String>) -> Self {
+        Self {
+            out_dir,
+            base_url: base_url.unwrap_or("/".into()),
+        }
     }
 }
 
@@ -60,7 +64,12 @@ impl Renderer for VitePressRenderer {
             let parent = class
                 .parent
                 .as_ref()
-                .map(|ty| format!(" : <code>{}</code>", ty.format_with_links(&ident_lookup)))
+                .map(|ty| {
+                    format!(
+                        " : <code>{}</code>",
+                        ty.format_with_links(&ident_lookup, &self.base_url)
+                    )
+                })
                 .unwrap_or_default();
 
             let mut class_functions = Vec::new();
@@ -100,7 +109,10 @@ impl Renderer for VitePressRenderer {
                         let ty = field
                             .ty
                             .map(|ty| {
-                                format!(": <code>{}</code>", ty.format_with_links(&ident_lookup))
+                                format!(
+                                    ": <code>{}</code>",
+                                    ty.format_with_links(&ident_lookup, &self.base_url)
+                                )
                             })
                             .unwrap_or_default();
 
@@ -117,7 +129,7 @@ impl Renderer for VitePressRenderer {
 
             let mut class_functions = class_functions
                 .into_iter()
-                .map(|func| generate_function_block(&func, &ident_lookup))
+                .map(|func| generate_function_block(&func, &ident_lookup, &self.base_url))
                 .collect::<Vec<_>>()
                 .join("\n");
 
@@ -158,7 +170,12 @@ outline: [2, 3]
             let types_short = alias
                 .types
                 .iter()
-                .map(|(ty, _desc)| format!("<code>{}</code>", ty.format_with_links(&ident_lookup)))
+                .map(|(ty, _desc)| {
+                    format!(
+                        "<code>{}</code>",
+                        ty.format_with_links(&ident_lookup, &self.base_url)
+                    )
+                })
                 .collect::<Vec<_>>()
                 .join(" | ");
 
@@ -168,7 +185,7 @@ outline: [2, 3]
                 .map(|(ty, desc)| {
                     format!(
                         "### <code>{}</code>\n\n{}\n",
-                        ty.format_with_links(&ident_lookup),
+                        ty.format_with_links(&ident_lookup, &self.base_url),
                         desc.unwrap_or_default()
                     )
                 })
@@ -361,7 +378,11 @@ fn sanitize_angle_brackets(markdown: impl ToString) -> String {
     markdown
 }
 
-fn generate_function_block(func: &Function, ident_lookup: &HashMap<String, Metatype>) -> String {
+fn generate_function_block(
+    func: &Function,
+    ident_lookup: &HashMap<String, Metatype>,
+    base_url: &str,
+) -> String {
     let is_method = func.is_method;
     let badge = if is_method {
         r#"<Badge type="method" text="method" />"#.to_string()
@@ -375,7 +396,7 @@ fn generate_function_block(func: &Function, ident_lookup: &HashMap<String, Metat
         .iter()
         .map(|param| {
             let nullable = param.ty.nullable.then_some("?").unwrap_or_default();
-            let ty = param.ty.format_with_links(ident_lookup);
+            let ty = param.ty.format_with_links(ident_lookup, base_url);
             format!("{}{nullable}: {}", param.name, ty)
         })
         .collect::<Vec<_>>()
@@ -391,7 +412,7 @@ fn generate_function_block(func: &Function, ident_lookup: &HashMap<String, Metat
                 .map(|name| format!("{name}: "))
                 .unwrap_or_default();
             // let ty = super::sanitize_angle_brackets(&ret.ty.to_string());
-            let ty = ret.ty.format_with_links(ident_lookup);
+            let ty = ret.ty.format_with_links(ident_lookup, base_url);
             format!("{name}{ty}")
         })
         .collect::<Vec<_>>()
@@ -414,7 +435,7 @@ fn generate_function_block(func: &Function, ident_lookup: &HashMap<String, Metat
             format!(
                 "`{}{nullable}`: <code>{}</code>{}",
                 param.name,
-                param.ty.format_with_links(ident_lookup),
+                param.ty.format_with_links(ident_lookup, base_url),
                 description
             )
         })
@@ -443,7 +464,7 @@ fn generate_function_block(func: &Function, ident_lookup: &HashMap<String, Metat
             format!(
                 "{}. {name}<code>{}</code>{description}",
                 i + 1,
-                ret.ty.format_with_links(ident_lookup)
+                ret.ty.format_with_links(ident_lookup, base_url)
             )
         })
         .collect::<Vec<_>>()
@@ -498,8 +519,8 @@ fn generate_function_block(func: &Function, ident_lookup: &HashMap<String, Metat
                 .unwrap_or_default();
 
             Some(format!(
-                "- <code><a href=\"/{path}/{belonging_type}{rest}\">\
-                {belonging_type}{rest_with_dot}</a></code>{desc}"
+                "- <code><a href=\"{base_url}{path}/{belonging_type}{rest}\">\
+                {belonging_type}{rest_with_dot}</a></code>{desc}",
             ))
         })
         .collect::<Vec<_>>()

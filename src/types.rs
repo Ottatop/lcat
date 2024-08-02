@@ -198,7 +198,11 @@ impl Type {
         }
     }
 
-    pub fn format_with_links(&self, ident_lookup: &HashMap<String, Metatype>) -> String {
+    pub fn format_with_links(
+        &self,
+        ident_lookup: &HashMap<String, Metatype>,
+        base_url: &str,
+    ) -> String {
         let repr = match &self.inner {
             TypeInner::Nil => "nil".into(),
             TypeInner::Any => "any".into(),
@@ -218,7 +222,10 @@ impl Type {
                     .iter()
                     .map(|(name, ty)| {
                         let nullable = ty.nullable.then_some("?").unwrap_or_default();
-                        format!("{name}{nullable}: {}", ty.format_with_links(ident_lookup))
+                        format!(
+                            "{name}{nullable}: {}",
+                            ty.format_with_links(ident_lookup, base_url)
+                        )
                     })
                     .collect::<Vec<_>>()
                     .join(", ");
@@ -232,7 +239,7 @@ impl Type {
                             name.as_ref()
                                 .map(|name| format!("{name}: "))
                                 .unwrap_or_default(),
-                            ty.format_with_links(ident_lookup)
+                            ty.format_with_links(ident_lookup, base_url)
                         )
                     })
                     .collect::<Vec<_>>()
@@ -249,16 +256,16 @@ impl Type {
             TypeInner::LightUserdata => "lightuserdata".into(),
             TypeInner::Union(union) => union
                 .iter()
-                .map(|ty| ty.format_with_links(ident_lookup))
+                .map(|ty| ty.format_with_links(ident_lookup, base_url))
                 .collect::<Vec<_>>()
                 .join(" | "),
             TypeInner::Array(ty) => {
-                format!("{}[]", ty.format_with_links(ident_lookup))
+                format!("{}[]", ty.format_with_links(ident_lookup, base_url))
             }
             TypeInner::Tuple(tuple) => {
                 let tys = tuple
                     .iter()
-                    .map(|ty| ty.format_with_links(ident_lookup))
+                    .map(|ty| ty.format_with_links(ident_lookup, base_url))
                     .collect::<Vec<_>>()
                     .join(", ");
                 format!("[{tys}]")
@@ -273,7 +280,7 @@ impl Type {
                         format!(
                             "{}: {}",
                             name.format_as_table_field_name(),
-                            ty.format_with_links(ident_lookup)
+                            ty.format_with_links(ident_lookup, base_url)
                         )
                     })
                     .collect::<Vec<_>>()
@@ -298,7 +305,7 @@ impl Type {
                     } else {
                         name.clone()
                     };
-                    format!(r#"<a href="/{path}/{name}">{sanitized_name}</a>"#)
+                    format!(r#"<a href="{base_url}{path}/{name}">{sanitized_name}</a>"#)
                 } else {
                     name.clone()
                 }
@@ -308,7 +315,7 @@ impl Type {
         let mut generics = self
             .generics
             .iter()
-            .map(|ty| ty.format_with_links(ident_lookup))
+            .map(|ty| ty.format_with_links(ident_lookup, base_url))
             .collect::<Vec<_>>()
             .join(", ");
 
