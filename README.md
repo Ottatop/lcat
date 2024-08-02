@@ -14,6 +14,7 @@ may or may not be suitable for display on, say, GitHub.
 
 ## Requirements
 - Rust and Cargo
+- Tree-sitter
 
 ## Building and running
 
