@@ -412,8 +412,9 @@ fn generate_function_block(
                 .map(|name| format!("{name}: "))
                 .unwrap_or_default();
             // let ty = super::sanitize_angle_brackets(&ret.ty.to_string());
+            let nullable = ret.ty.nullable.then_some("?").unwrap_or_default();
             let ty = ret.ty.format_with_links(ident_lookup, base_url);
-            format!("{name}{ty}")
+            format!("{name}{ty}{nullable}")
         })
         .collect::<Vec<_>>()
         .join(", ");

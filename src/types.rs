@@ -324,9 +324,7 @@ impl Type {
             generics = format!("&lt;{generics}>");
         }
 
-        let nullable = self.nullable.then_some("?").unwrap_or_default();
-
-        format!("{repr}{generics}{nullable}")
+        format!("{repr}{generics}")
     }
 
     pub fn is_user_defined(&self) -> bool {
