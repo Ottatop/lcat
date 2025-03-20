@@ -275,10 +275,11 @@ impl Type {
                     .fields
                     .iter()
                     .map(|(name, ty)| {
-                        // WARN: might be cyclic
+                        let nullable = ty.nullable.then_some("?").unwrap_or_default();
+
                         // TODO: add links to name
                         format!(
-                            "{}: {}",
+                            "{}{nullable}: {}",
                             name.format_as_table_field_name(),
                             ty.format_with_links(ident_lookup, base_url)
                         )
@@ -323,7 +324,9 @@ impl Type {
             generics = format!("&lt;{generics}>");
         }
 
-        format!("{repr}{generics}")
+        let nullable = self.nullable.then_some("?").unwrap_or_default();
+
+        format!("{repr}{generics}{nullable}")
     }
 
     pub fn is_user_defined(&self) -> bool {
