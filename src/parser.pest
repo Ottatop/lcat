@@ -56,13 +56,18 @@ field_scope = { "public" | "private" | "protected" | "package" }
 // or
 // ---@alias <name>
 // ---| '<value>' [# description]
-alias                 = { type_ident ~ ty? ~ rest_of_line? }
-alias_additional_type = { ty ~ ("#" | "--")? ~ rest_of_line? }
+alias = { type_ident ~ ty? ~ rest_of_line? }
 
 // ---@param <name[?]> <type[|type...]> [description]
-param = { ident ~ nullable? ~ ty ~ ("#" | "--")? ~ rest_of_line? }
+// or
+// ---@param <name[?]> [description]
+// ---| <type> [description]
+param = { ident ~ nullable? ~ (("#" | "--") | ty ~ ("#" | "--")?)? ~ rest_of_line? }
+
 // ---@return <type> [<name> [comment] | [name] #<comment>]
 ret = { ty ~ (("#" | "--" | ident?)? ~ rest_of_line?)? }
+
+additional_type = { ty ~ ("#" | "--")? ~ rest_of_line? }
 
 // ---@enum [(key)] <name>
 _enum    = { enum_key? ~ type_ident ~ rest_of_line? }

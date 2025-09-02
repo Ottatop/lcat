@@ -4,7 +4,7 @@ use pest::Parser;
 
 use crate::{
     annotation::{
-        parse_alias, parse_alias_line, parse_class, parse_enum, parse_field, parse_lcat,
+        parse_additional_type_line, parse_alias, parse_class, parse_enum, parse_field, parse_lcat,
         parse_param, parse_return, parse_see, parse_type_annotation, Alias, Class, Enum, Function,
         LcatOption, Param, PestParser, Return, Rule, See, TsField,
     },
@@ -82,16 +82,31 @@ impl Processor {
             match try_parse_annotation(&comment) {
                 None => {
                     if let Some(LastDeclared::Alias(alias)) = last_declared.as_mut() {
-                        if let Some(alias_line) = try_parse_alias_line(&comment) {
-                            if let Some(alias_line) = alias_line {
+                        if let Some(piped_line) = try_parse_piped_line(&comment) {
+                            if let Some(alias_line) = piped_line {
                                 let description =
                                     (!doc_comments.is_empty()).then(|| doc_comments.join("\n"));
-                                let additional_type = parse_alias_line(&alias_line, description);
+                                let additional_type =
+                                    parse_additional_type_line(&alias_line, description);
                                 match additional_type {
                                     Ok((ty, ty_desc)) => {
                                         doc_comments.clear();
 
                                         alias.add_type(ty, ty_desc);
+                                    }
+                                    Err(_) => todo!(),
+                                }
+                            }
+                            continue;
+                        }
+                    } else if let Some(param) = fn_annotations.params.last_mut() {
+                        if let Some(piped_line) = try_parse_piped_line(&comment) {
+                            if let Some(param_line) = piped_line {
+                                // FIXME: doesn't handle doc comments directly above the param
+                                let additional_type = parse_additional_type_line(&param_line, None);
+                                match additional_type {
+                                    Ok((ty, ty_desc)) => {
+                                        param.add_type(ty, ty_desc);
                                     }
                                     Err(_) => todo!(),
                                 }
@@ -518,10 +533,10 @@ fn try_parse_annotation(line: &str) -> Option<(Annotation, String)> {
     ))
 }
 
-fn try_parse_alias_line(line: &str) -> Option<Option<String>> {
-    let mut alias_line = PestParser::parse(Rule::piped_line, line).ok()?;
+fn try_parse_piped_line(line: &str) -> Option<Option<String>> {
+    let mut piped_line = PestParser::parse(Rule::piped_line, line).ok()?;
 
-    let rest_of_line = alias_line.next().unwrap().into_inner().next();
+    let rest_of_line = piped_line.next().unwrap().into_inner().next();
 
     Some(rest_of_line.map(|line| line.as_str().to_string()))
 }

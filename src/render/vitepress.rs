@@ -137,10 +137,11 @@ impl Renderer for VitePressRenderer {
                 class_functions = format!("## Functions\n\n{class_functions}");
             }
 
-            let exact_badge = class
-                .exact
-                .then_some(r#"<Badge type="tip" text="exact" />"#)
-                .unwrap_or_default();
+            let exact_badge = if class.exact {
+                r#"<Badge type="tip" text="exact" />"#
+            } else {
+                Default::default()
+            };
 
             let mut contents = format!(
                 r#"---
@@ -219,12 +220,14 @@ outline: [2, 3]
             let desc = en.description.clone().unwrap_or_default();
             let key = en.is_key;
 
-            let key_badge = key
-                .then_some(r#"<Badge type="tip" text="key" />"#)
-                .unwrap_or_default();
+            let key_badge = if key {
+                r#"<Badge type="tip" text="key" />"#
+            } else {
+                Default::default()
+            };
 
-            let values_short = key
-                .then(|| {
+            let values_short = if key {
+                {
                     en.fields
                         .iter()
                         .filter_map(|field| {
@@ -236,8 +239,10 @@ outline: [2, 3]
                         })
                         .collect::<Vec<_>>()
                         .join(" | ")
-                })
-                .unwrap_or_default();
+                }
+            } else {
+                Default::default()
+            };
 
             let body = if key {
                 let mut values = en
@@ -395,8 +400,9 @@ fn generate_function_block(
         .params
         .iter()
         .map(|param| {
-            let nullable = param.ty.nullable.then_some("?").unwrap_or_default();
-            let ty = param.ty.format_with_links(ident_lookup, base_url);
+            let ty = param.types_coalesced();
+            let nullable = if ty.nullable { "?" } else { Default::default() };
+            let ty = ty.format_with_links(ident_lookup, base_url);
             format!("{}{nullable}: {}", param.name, ty)
         })
         .collect::<Vec<_>>()
@@ -412,7 +418,11 @@ fn generate_function_block(
                 .map(|name| format!("{name}: "))
                 .unwrap_or_default();
             // let ty = super::sanitize_angle_brackets(&ret.ty.to_string());
-            let nullable = ret.ty.nullable.then_some("?").unwrap_or_default();
+            let nullable = if ret.ty.nullable {
+                "?"
+            } else {
+                Default::default()
+            };
             let ty = ret.ty.format_with_links(ident_lookup, base_url);
             format!("{name}{ty}{nullable}")
         })
@@ -432,16 +442,39 @@ fn generate_function_block(
                 .as_ref()
                 .map(|desc| format!(" - {desc}"))
                 .unwrap_or_default();
-            let nullable = param.ty.nullable.then_some("?").unwrap_or_default();
-            format!(
-                "`{}{nullable}`: <code>{}</code>{}",
-                param.name,
-                param.ty.format_with_links(ident_lookup, base_url),
-                description
-            )
+
+            let nullable = if param.nullable {
+                "?"
+            } else {
+                Default::default()
+            };
+
+            let mut types = param
+                .types
+                .iter()
+                .map(|(ty, desc)| {
+                    let desc = desc
+                        .as_ref()
+                        .map(|desc| format!(" - {desc}"))
+                        .unwrap_or_default();
+
+                    format!(
+                        "&emsp; ┃ <code>{}</code>{}<br>",
+                        ty.format_with_links(ident_lookup, base_url),
+                        desc
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
+
+            if !types.is_empty() {
+                types = format!("\n{types}");
+            }
+
+            format!("`{}{nullable}`{description}<br>{types}", param.name)
         })
         .collect::<Vec<_>>()
-        .join("<br>\n");
+        .join("\n\n");
 
     if !params.is_empty() {
         params = format!("#### Parameters\n\n{params}\n\n");

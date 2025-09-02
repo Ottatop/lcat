@@ -317,11 +317,11 @@ pub fn parse_alias(alias: &str, description: Option<String>) -> anyhow::Result<A
     })
 }
 
-pub fn parse_alias_line(
+pub fn parse_additional_type_line(
     line: &str,
     description: Option<String>,
 ) -> anyhow::Result<(Type, Option<String>)> {
-    let mut line = PestParser::parse(Rule::alias_additional_type, line)?;
+    let mut line = PestParser::parse(Rule::additional_type, line)?;
 
     let mut ty = None;
     let mut eol_desc = None;
@@ -356,14 +356,11 @@ pub fn parse_param(param: &str) -> anyhow::Result<Param> {
         }
     }
 
-    if nullable {
-        ty.as_mut().unwrap().make_nullable();
-    }
-
     Ok(Param {
         name: name.unwrap(),
-        ty: ty.unwrap(),
+        types: ty.into_iter().map(|ty| (ty, None)).collect(),
         description,
+        nullable,
     })
 }
 
@@ -570,8 +567,23 @@ pub enum Scope {
 #[derive(Debug, Clone)]
 pub struct Param {
     pub name: String,
-    pub ty: Type,
+    pub types: Vec<(Type, Option<String>)>,
     pub description: Option<String>,
+    pub nullable: bool,
+}
+
+impl Param {
+    pub fn add_type(&mut self, ty: Type, desc: Option<String>) {
+        self.types.push((ty, desc));
+    }
+
+    pub fn types_coalesced(&self) -> Type {
+        let mut types = Type::union(self.types.clone().into_iter().map(|(ty, _)| ty));
+        if self.nullable {
+            types.make_nullable();
+        }
+        types
+    }
 }
 
 #[derive(Debug, Clone)]

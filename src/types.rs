@@ -221,7 +221,7 @@ impl Type {
                 let args = args
                     .iter()
                     .map(|(name, ty)| {
-                        let nullable = ty.nullable.then_some("?").unwrap_or_default();
+                        let nullable = if ty.nullable { "?" } else { Default::default() };
                         format!(
                             "{name}{nullable}: {}",
                             ty.format_with_links(ident_lookup, base_url)
@@ -233,7 +233,7 @@ impl Type {
                 let mut returns = ret
                     .iter()
                     .map(|(name, ty)| {
-                        let nullable = ty.nullable.then_some("?").unwrap_or_default();
+                        let nullable = if ty.nullable { "?" } else { Default::default() };
                         format!(
                             "{}{}{nullable}",
                             name.as_ref()
