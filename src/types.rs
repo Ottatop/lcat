@@ -270,6 +270,7 @@ impl Type {
                     .join(", ");
                 format!("[{tys}]")
             }
+            TypeInner::TableDef(table) if table.fields.is_empty() => "{}".to_string(),
             TypeInner::TableDef(table) => {
                 let fields = table
                     .fields
@@ -393,6 +394,7 @@ impl std::fmt::Display for Type {
                     .join(", ");
                 format!("[{tys}]")
             }
+            TypeInner::TableDef(table) if table.fields.is_empty() => "{}".to_string(),
             TypeInner::TableDef(table) => {
                 let fields = table
                     .fields

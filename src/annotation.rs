@@ -168,7 +168,9 @@ fn parse_function(pair: Pair<Rule>) -> Type {
 fn parse_table(pair: Pair<Rule>) -> Type {
     assert_eq!(pair.as_rule(), Rule::table_def);
 
-    let pair = pair.into_inner().next().unwrap();
+    let Some(pair) = pair.into_inner().next() else {
+        return Type::table(Vec::new())
+    };
 
     assert_eq!(pair.as_rule(), Rule::table_fields);
 
