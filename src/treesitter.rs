@@ -256,6 +256,11 @@ pub fn parse_field_block(node: Node, source: &[u8], annotations: &[String]) -> O
     let field_name = name.map(|name| {
         if name.kind() == NodeType::IDENTIFIER {
             FieldName::Ident(name.utf8_text(source).unwrap().to_string())
+        } else if name.kind() == NodeType::STRING {
+            let string_content = name
+                .child_by_field_name("content")
+                .expect("this should be a string_content");
+            FieldName::Ident(string_content.utf8_text(source).unwrap().to_string())
         } else {
             FieldName::Value(name.utf8_text(source).unwrap().to_string())
         }
